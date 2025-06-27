@@ -62,6 +62,7 @@ async def fetch_tiktok_stats(username):
     print(f"\n[TikTok] @{username}")
     try:
         api = TikTokApi()
+        await api.create_sessions()
         user = api.user(username)
         count = 0
         async for video in user.videos():
@@ -77,6 +78,7 @@ async def fetch_tiktok_stats(username):
 def fetch_instagram_stats(username):
     print(f"\n[Instagram] @{username}")
     try:
+        L.load_session_from_file('booktalesesp')  # Replace with your IG username after logging in with instaloader --login your_username
         profile = instaloader.Profile.from_username(L.context, username)
         print(f"- Followers: {profile.followers}")
 
@@ -84,7 +86,7 @@ def fetch_instagram_stats(username):
         count = 0
         for post in posts:
             if post.is_video:
-                print(f"- {post.title[:50]}: {post.video_view_count} views")
+                print(f"- {post.caption[:50]}: {post.video_view_count} views")
                 count += 1
             if count >= 5:
                 break
@@ -98,10 +100,13 @@ for yt in youtube_list:
     if resolved_id:
         fetch_youtube_videos(resolved_id)
 
-# TikTok (use asyncio for each user)
+# Process TikTok
 print("\nFetching TikTok Stats...")
-for tk in tiktok_list:
-    asyncio.run(fetch_tiktok_stats(tk))
+async def process_tiktok():
+    for tk in tiktok_list:
+        await fetch_tiktok_stats(tk)
+
+asyncio.run(process_tiktok())
 
 # Process Instagram
 print("\nFetching Instagram Stats...")
